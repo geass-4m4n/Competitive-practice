@@ -1,7 +1,4 @@
-/*
-  AUTHOR:SOURABH
-  CREATED:26:01:19
-*/
+
 #include<bits/stdc++.h>
 #define ll long long int
 #define ld long double
