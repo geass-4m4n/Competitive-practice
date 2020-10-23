@@ -1,4 +1,4 @@
-
+//not in use
 #include<bits/stdc++.h>
 #define ll long long int
 #define ld long double
@@ -286,7 +286,7 @@ int main()
     //freopen("in.txt","r",stdin);
     //freopen("out.txt","w",stdout);
 
-    ll n,m,u,v,w,i;
+    ll n,m,u,v,w,i,j;
     cin>>n>>m;
     initalize(n);
     fs(i,1,m+1)
