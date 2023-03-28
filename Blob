@@ -1,0 +1,40 @@
+import com.azure.identity.DefaultAzureCredentialBuilder;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.specialized.BlockBlobClient;
+import org.springframework.stereotype.Service;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class MyService {
+
+    public List<String[]> readCsvFileFromBlobStorage(String containerName, String blobName) throws IOException {
+        // Create a BlobServiceClient to connect to Azure Storage
+        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+                .endpoint("https://<your-storage-account-name>.blob.core.windows.net")
+                .credential(new DefaultAzureCredentialBuilder().build())
+                .buildClient();
+
+        // Get a BlockBlobClient for the CSV file
+        BlockBlobClient blobClient = blobServiceClient.getBlobContainerClient(containerName)
+                .getBlobClient(blobName)
+                .getBlockBlobClient();
+
+        // Read the contents of the CSV file into a list of string arrays
+        BufferedReader reader = new BufferedReader(new InputStreamReader(blobClient.openInputStream(), StandardCharsets.UTF_8));
+        List<String[]> csvData = new ArrayList<>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] values = line.split(",");
+            csvData.add(values);
+        }
+
+        return csvData;
+    }
+}
