@@ -37,3 +37,84 @@ public class CsvController {
         return objects;
     }
 }
+
+
+import com.azure.storage.blob.BlobClientBuilder;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobProperties;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Service;
+
+@SpringBootApplication
+public class Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+
+}
+
+@Service
+class CsvReaderService {
+
+    private static final String connectionString = "YOUR_CONNECTION_STRING";
+    private static final String containerName = "YOUR_CONTAINER_NAME";
+    private static final String fileName = "YOUR_FILE_NAME";
+
+    public List<String[]> readCsv() throws IOException {
+
+        BlobContainerClient containerClient = new BlobContainerClientBuilder()
+                .connectionString(connectionString)
+                .containerName(containerName)
+                .buildClient();
+
+        BlobClientBuilder blobClientBuilder = new BlobServiceClientBuilder()
+                .connectionString(connectionString)
+                .buildClientBuilder()
+                .getBlobContainerClient(containerName)
+                .getBlobClient(fileName);
+
+        BlobProperties blobProperties = blobClientBuilder.getProperties();
+        long fileSize = blobProperties.getBlobSize();
+
+        // Set the buffer size for reading the CSV file
+        int bufferSize = 4096;
+
+        // Create a buffer to hold the CSV file content
+        byte[] buffer = new byte[bufferSize];
+
+        // Create a list to hold the CSV file data
+        List<String[]> csvData = new ArrayList<>();
+
+        // Open an input stream to read the CSV file from the blob
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(blobClientBuilder.openInputStream()))) {
+
+            // Read the CSV file data line by line
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Split each line by comma to get the individual fields
+                String[] fields = line.split(",");
+                // Add the fields to the list of CSV data
+                csvData.add(fields);
+            }
+
+        } catch (IOException ex) {
+            throw new IOException("Failed to read CSV file from Azure Blob Storage: " + ex.getMessage());
+        }
+
+        return csvData;
+    }
+
+}
