@@ -1,0 +1,39 @@
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+public class CsvController {
+
+    @Autowired
+    private BlobServiceClient blobServiceClient;
+
+    @GetMapping("/csv")
+    public List<MyObject> getCsv() throws IOException {
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient("<container-name>");
+        BlobClient blobClient = containerClient.getBlobClient("<file-name>.csv");
+
+        CsvMapper csvMapper = new CsvMapper();
+        CsvSchema schema = CsvSchema.emptySchema().withHeader();
+
+        List<MyObject> objects = new ArrayList<>();
+
+        try (InputStream inputStream = blobClient.openInputStream()) {
+            objects = csvMapper.readerFor(MyObject.class).with(schema).readValue(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return objects;
+    }
+}
