@@ -38,3 +38,15 @@ public class MyService {
         return csvData;
     }
 }
+
+
+# Azure Blob Storage account name
+spring.cloud.azure.storage.account=<your-storage-account-name>
+
+# Azure Blob Storage account key or SAS token
+spring.cloud.azure.storage.credentials=<your-storage-account-key-or-sas-token>
+
+# Optional: set the default container for BlobServiceOperations
+spring.cloud.azure.storage.blob.default-container=<your-default-container>
+
+
